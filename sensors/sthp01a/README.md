@@ -25,7 +25,7 @@ source venv/bin/activate
 python -m venv venv
 venv\Scripts\activate
 
-pip install -r requirements.txt
+pip install pymodbus pyserial
 ```
 
 ### 2. Identifier le port série
