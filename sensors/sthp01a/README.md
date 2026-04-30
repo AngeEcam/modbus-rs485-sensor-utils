@@ -71,7 +71,7 @@ PORT = "COM3"                          # Windows
 If you don't know the Modbus address of your sensor, this script queries all addresses from 1 to 247.
 
 ```bash
-python scan_bus.py
+python scan_slave_ID_sthp01a.py
 ```
 
 **Expected output:**
@@ -90,7 +90,7 @@ Sensor found at address: 1
 Update `SLAVE_ID` in the script with the value found during the scan, then:
 
 ```bash
-python read_sensor.py
+python scan_slave_ID_sthp01a.py
 ```
 
 **Expected output:**
@@ -119,7 +119,7 @@ Useful if you have multiple sensors on the same RS485 bus and need to differenti
 Update `OLD_ID` (current address) and `NEW_ID` (desired new address) in the script, then:
 
 ```bash
-python change_id.py
+python set_slave_ID_sthp01a.py
 ```
 
 **Expected output:**
