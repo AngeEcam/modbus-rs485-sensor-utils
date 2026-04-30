@@ -1,20 +1,20 @@
 # RS485 Modbus Sensor Toolkit
 
-Outils Python pour interagir avec un capteur de température/humidité/pression via RS485 Modbus RTU sur macOS.
+Python tools to interact with a temperature/humidity/pressure sensor via RS485 Modbus RTU.
 
 ---
 
-## Prérequis matériel
+## Hardware Requirements
 
-- Capteur RS485 (STHP01A)
-- Adaptateur USB → RS485 (Hub USB si port USB C)
-- Câble de connexion A/B vers le capteur
+- RS485 sensor (STHP01A)
+- USB → RS485 adapter (USB hub if USB-C only port)
+- A/B connection cable to the sensor
 
 ---
 
 ## Installation
 
-### 1. Installer les dépendances
+### 1. Install dependencies
 
 ```bash
 # macOS / Linux
@@ -28,115 +28,116 @@ venv\Scripts\activate
 pip install pymodbus pyserial
 ```
 
-### 2. Identifier le port série
+### 2. Identify the serial port
 
-Brancher l'adaptateur USB→RS485, puis :
+Plug in the USB→RS485 adapter, then:
 
 ```bash
 ls /dev/tty.usbserial-*    # macOS
 ls /dev/ttyUSB*            # Linux
 ```
-Windows : ouvrir le **Gestionnaire de périphériques → Ports (COM et LPT)**, le port apparaît comme `COM3`, `COM4`, etc.
 
-Mettre à jour la variable `PORT` dans chaque script :
+Windows: open **Device Manager → Ports (COM & LPT)**, the port appears as `COM3`, `COM4`, etc.
+
+Update the `PORT` variable in each script accordingly:
 
 ```python
 PORT = "/dev/tty.usbserial-A5069RR4"   # macOS
 PORT = "/dev/ttyUSB0"                  # Linux
 PORT = "COM3"                          # Windows
 ```
+
 ---
 
 ## Workflow
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│  1. Scanner le bus  →  scan_bus.py                  │
-│     Trouve l'adresse Slave ID du capteur            │
+│  1. Scan the bus      →  scan_bus.py                │
+│     Finds the Slave ID address of the sensor        │
 │                                                     │
-│  2. Lire les données  →  read_sensor.py             │
-│     Utilise le Slave ID trouvé pour lire T/H/P      │
+│  2. Read sensor data  →  read_sensor.py             │
+│     Uses the Slave ID found to read T/H/P           │
 │                                                     │
-│  3. (Optionnel) Changer le Slave ID  →  change_id.py│
-│     Si plusieurs capteurs sur le même bus           │
+│  3. (Optional) Change Slave ID  →  change_id.py     │
+│     If multiple sensors share the same bus          │
 └─────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Étape 1 — Scanner le bus (`scan_bus.py`)
+## Step 1 — Scan the bus (`scan_bus.py`)
 
-Si vous ne connaissez pas l'adresse Modbus de votre capteur, ce script interroge toutes les adresses de 1 à 247.
+If you don't know the Modbus address of your sensor, this script queries all addresses from 1 to 247.
 
 ```bash
 python scan_bus.py
 ```
 
-**Sortie attendue :**
+**Expected output:**
 ```
-Recherche du capteur...
-Capteur trouvé à l'adresse : 1
+Searching for sensor...
+Sensor found at address: 1
 ```
 
-> Le scan peut prendre quelques secondes (timeout de 0.5s par adresse).  
-> Notez le Slave ID trouvé, il sera utilisé à l'étape suivante.
+> The scan may take a few seconds (0.5s timeout per address).  
+> Note the Slave ID found — it will be used in the next step.
 
 ---
 
-## Étape 2 — Lire les données (`read_sensor.py`)
+## Step 2 — Read sensor data (`read_sensor.py`)
 
-Mettre à jour `SLAVE_ID` dans le script avec la valeur trouvée au scan, puis :
+Update `SLAVE_ID` in the script with the value found during the scan, then:
 
 ```bash
 python read_sensor.py
 ```
 
-**Sortie attendue :**
+**Expected output:**
 ```
-Registres bruts : [2265, 3924, 809, 10194]
-Température : 22.65 °C
-Humidité    : 39.24 %
-Pression    : 1019.4 hPa
+Raw registers: [2265, 3924, 809, 10194]
+Temperature : 22.65 °C
+Humidity    : 39.24 %
+Pressure    : 1019.4 hPa
 ```
 
-### Correspondance des registres
+### Register mapping
 
-| Registre | Index | Paramètre   | Diviseur | Unité |
-|----------|-------|-------------|----------|-------|
-| 0x0000   | [0]   | Température | /100     | °C    |
-| 0x0001   | [1]   | Humidité    | /100     | %RH   |
-| 0x0002   | [2]   | (réservé)   | —        | —     |
-| 0x0003   | [3]   | Pression    | /10      | hPa   |
+| Register | Index | Parameter   | Divisor | Unit |
+|----------|-------|-------------|---------|------|
+| 0x0000   | [0]   | Temperature | /100    | °C   |
+| 0x0001   | [1]   | Humidity    | /100    | %RH  |
+| 0x0002   | [2]   | (reserved)  | —       | —    |
+| 0x0003   | [3]   | Pressure    | /10     | hPa  |
 
 ---
 
-## Étape 3 — Changer le Slave ID (`change_id.py`) *(optionnel)*
+## Step 3 — Change Slave ID (`change_id.py`) *(optional)*
 
-Utile si vous avez plusieurs capteurs sur le même bus RS485 et devez les différencier. Chaque capteur doit avoir une adresse unique (1–247).
+Useful if you have multiple sensors on the same RS485 bus and need to differentiate them. Each sensor must have a unique address (1–247).
 
-Mettre à jour `OLD_ID` (adresse actuelle) et `NEW_ID` (nouvelle adresse souhaitée) dans le script, puis :
+Update `OLD_ID` (current address) and `NEW_ID` (desired new address) in the script, then:
 
 ```bash
 python change_id.py
 ```
 
-**Sortie attendue :**
+**Expected output:**
 ```
-Changement adresse 2 → 1
-Adresse modifiée avec succès !
+Changing address 2 → 1
+Address successfully changed!
 ```
 
-> Après le changement d’adresse, redémarrer électriquement le capteur (OFF → ON), puis relancer scan_bus.py pour confirmer la nouvelle adresse.
+> After changing the address, power cycle the sensor (OFF → ON), then run `scan_bus.py` again to confirm the new address.
+
 ---
 
-## Configuration RS485
+## RS485 Configuration
 
-| Paramètre | Valeur |
-|-----------|--------|
-| Baudrate  | 9600   |
-| Data bits | 8      |
-| Parité    | None   |
-| Stop bits | 1      |
-| Protocole | Modbus RTU |
-
----
+| Parameter | Value      |
+|-----------|------------|
+| Baudrate  | 9600       |
+| Data bits | 8          |
+| Parity    | None       |
+| Stop bits | 1          |
+| Protocol  | Modbus RTU |
