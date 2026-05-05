@@ -1,7 +1,7 @@
 from pymodbus.client import ModbusSerialClient
 
 PORT = "/dev/tty.usbserial-A5069RR4"
-SLAVE_ID = 0
+SLAVE_ID = 3
 
 client = ModbusSerialClient(
     port=PORT,
