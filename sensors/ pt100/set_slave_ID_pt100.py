@@ -4,8 +4,8 @@ from pymodbus.client import ModbusSerialClient
 logging.disable(logging.CRITICAL)
 
 PORT = "/dev/tty.usbserial-A5069RR4"
-OLD_ID = 3
-NEW_ID = 4
+OLD_ID = 4
+NEW_ID = 3
 
 client = ModbusSerialClient(
     port=PORT,
