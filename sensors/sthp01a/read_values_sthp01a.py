@@ -35,6 +35,29 @@ try:
     else:
         print("Réponse inattendue :", result)
 
+    # Lecture du USERSN (4 registres)
+    usersn_result = client.read_holding_registers(
+    address=0x0220,
+    count=4,
+    device_id=SLAVE_ID
+    )
+
+    if hasattr(usersn_result, 'isError') and usersn_result.isError():
+        print("Erreur lecture USERSN :", usersn_result)
+
+    elif hasattr(usersn_result, 'registers'):
+        usersn = usersn_result.registers
+
+        print("USERSN brut :", usersn)
+
+        # Affichage hex propre
+        usersn_hex = [f"0x{reg:04X}" for reg in usersn]
+        print("USERSN (hex) :", usersn_hex)
+
+    else:
+        print("Réponse USERSN inattendue :", usersn_result)
+
+
 except Exception as e:
     print(f"Exception : {e}")
 
